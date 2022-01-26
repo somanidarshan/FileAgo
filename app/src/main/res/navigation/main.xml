@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    app:startDestination="@id/yourStuff">
+    <fragment
+        android:id="@+id/yourStuff"
+        android:name="com.example.fileagoapplication.YourStuff"
+        android:label="Your Stuff"
+        tools:layout="@layout/fragment_your_stuff" />
+    <fragment
+        android:id="@+id/groups"
+        android:name="com.example.fileagoapplication.Groups"
+        android:label="Groups"
+        tools:layout="@layout/fragment_groups" />
+    <fragment
+        android:id="@+id/chat"
+        android:name="com.example.fileagoapplication.Chat"
+        android:label="Chat"
+        tools:layout="@layout/fragment_chat" />
+
+
+
+</navigation>

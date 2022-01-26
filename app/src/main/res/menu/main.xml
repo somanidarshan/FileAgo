@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Workspace"
+        android:id="@+id/yourStuff"
+        android:menuCategory="secondary"
+        android:icon="@drawable/ic_home"/>
+    <item android:title="Groups"
+        android:id="@+id/groups"
+        android:menuCategory="secondary"
+        android:icon="@drawable/ic_groups"/>
+    <item android:title="Chat"
+        android:id="@+id/chat"
+        android:menuCategory="secondary"
+        android:icon="@drawable/ic_chat"/>
+</menu>
