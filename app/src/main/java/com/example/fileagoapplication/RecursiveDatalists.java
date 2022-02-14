@@ -1,14 +1,22 @@
 package com.example.fileagoapplication;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
@@ -23,17 +31,19 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.POST;
-
 public class RecursiveDatalists extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
     private String uuid;
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
+    private String  actionbartittle;
     private EditText foldername;
     private Button createfolder,cancel;
     private FloatingActionButton extendedFloatingActionButton;
@@ -42,8 +52,10 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
     private ArrayList<data> dataArrayList;
     private DataAdapter dataAdapter;
     private String token;
+    private Uri filedata;
     private NavigationView navigationView;
     private Boolean isfalse;
+    private String filename;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +64,7 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         fab2=findViewById(R.id.createfolder);
         fab1.hide();
         fab2.hide();
+
         extendedFloatingActionButton=findViewById(R.id.actions);
         isfalse=false;
         navigationView=findViewById(R.id.navigationview);
@@ -75,7 +88,8 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                 }
             }
         });
-        String  actionbartittle=getIntent().getStringExtra("name");
+
+        actionbartittle=getIntent().getStringExtra("name");
         getSupportActionBar().setTitle(actionbartittle);
         token=getIntent().getStringExtra("token");
         final String ss=token;
@@ -84,20 +98,29 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         foldername=findViewById(R.id.foldername);
         createfolder=findViewById(R.id.createbutton);
 
-        fab1.setOnClickListener(new View.OnClickListener() {
+        fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createnewfolderfunction(token,uuid);
                 }
         });
-
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i=new Intent(RecursiveDatalists.this,UploadFilestoServer.class);
+                i.putExtra("token",token);
+                i.putExtra("uuid",uuid);
+                startActivity(i);
+            }
+        });
         dataArrayList=new ArrayList<>();
-        dataAdapter=new DataAdapter(dataArrayList,RecursiveDatalists.this,token);
+        dataAdapter=new DataAdapter(dataArrayList,RecursiveDatalists.this,token,uuid,actionbartittle);
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
         getfolders(ss,uuid);
         dataAdapter.notifyDataSetChanged();
     }
+
     private void createnewfolderfunction(String token, String uuid) {
         dialogBuilder=new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Enter the Name of the Folder");
@@ -109,17 +132,24 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
             public void onClick(DialogInterface dialogInterface, int i) {
                 DIRNAME dirname = new DIRNAME();
                 dirname.setFoldername(foldername.getText().toString());
-                Toast.makeText(RecursiveDatalists.this,"xxxx"+dirname.getFoldername(), Toast.LENGTH_SHORT).show();
                 Call<Void> call=RetrofitClient.getApiInterface().createfolder("Bearer "+token,uuid,dirname);
-
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if(response.isSuccessful()) {
                             Toast.makeText(RecursiveDatalists.this, "Success", Toast.LENGTH_SHORT).show();
+                            dataArrayList.clear();
+                            fab1.hide();
+                            fab2.hide();
+                            Intent i=new Intent(RecursiveDatalists.this,RecursiveDatalists.class);
+                            i.putExtra("token",token);
+                            i.putExtra("uuid",uuid);
+                            i.putExtra("name",actionbartittle);
+                            startActivity(i);
+                            finish();
                         }
                         else{
-                            Toast.makeText(RecursiveDatalists.this, "Response", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RecursiveDatalists.this, "Something went Wrong!!Please Try again!", Toast.LENGTH_SHORT).show();
                         }
                     }
                     @Override
@@ -150,7 +180,7 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -160,15 +190,49 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
             }
             @Override
             public void onFailure(Call<PersonalWorkspace> call, Throwable t) {
+
             }
         });
     }
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-
+            case R.id.private_navigate:
+                Intent i = new Intent(RecursiveDatalists.this, PrivateShares.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.public_navigate:
+                i=new Intent(RecursiveDatalists.this,PublicShares.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.fav_navigate:
+                i=new Intent(RecursiveDatalists.this,Favorites.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.shared_navigate:
+                i=new Intent(RecursiveDatalists.this,SharedWithYou.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.trash_navigate:
+                i=new Intent(RecursiveDatalists.this,Trash.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.incoming_navigate:
+                i=new Intent(RecursiveDatalists.this,Incoming.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.home_navigate:
+                Intent intent=new Intent(RecursiveDatalists.this,Workspace.class);
+                intent.putExtra("token",token);
+                startActivity(intent);
+                break;
         }
-
         return true;
     }
 

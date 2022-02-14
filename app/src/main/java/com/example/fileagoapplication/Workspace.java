@@ -11,7 +11,9 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,16 +21,25 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class Workspace extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     NavigationView navigationView;
     DrawerLayout drawerLayout;
     private Intent intent;
+    private String token;
+    private  LoginRequest loginRequest;
     private ActionBarDrawerToggle toggle;
     BottomNavigationView bottomNavigationView;
     private NavController navController;
+    private SharedPreferences sharedPreferences;
     private AppBarConfiguration appBarConfiguration;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +48,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
         drawerLayout=findViewById(R.id.drawer);
         bottomNavigationView=findViewById(R.id.bottomNavigationView);
         navigationView=findViewById(R.id.navigationview);
+        sharedPreferences=getSharedPreferences("session",MODE_PRIVATE);
         getSupportActionBar().setTitle("Home");
         toggle=new ActionBarDrawerToggle(this,drawerLayout,R.string.open,R.string.close);
         drawerLayout.addDrawerListener(toggle);
@@ -49,12 +61,50 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                 .Builder(new int[]{R.id.yourStuff,R.id.groups,R.id.chat})
                 .build();
         NavigationUI.setupActionBarWithNavController(this,navController,appBarConfiguration);
-
         NavigationUI.setupWithNavController(bottomNavigationView,navController);
-         intent=getIntent();
-        String token=intent.getStringExtra("token");
+        token=getIntent().getStringExtra("token");
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
+        String emailid=sharedPreferences.getString("emailid",null);
+        String password=sharedPreferences.getString("pass",null);
+        if(emailid!=null){
+            loginRequest=new LoginRequest();
+            loginRequest.setUsername(emailid);
+            loginRequest.setPassword(password);
+            Call<User> call=RetrofitClient.getApiInterface().userlogin(loginRequest);
+            call.enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    if(response.isSuccessful()) {
+                        String sta = response.body().getStatus();
+                        Log.e("onResponse: ", sta);
+                        if (sta.equals("success")) {
+                           token=response.body().getToken();
+                            FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+                            YourStuff yourStuff=new YourStuff();
+                            components.setTitle("Your Stuff");
+                            getSupportActionBar().setTitle("Your Stuff");
+                            Bundle data=new Bundle();
+                            data.putString("token",token);
+                            yourStuff.setArguments(data);
+                            fragmentTransaction.replace(R.id.nav_host_fragment,yourStuff).commit();
+                        }
+                        else{
+                            Toast.makeText(Workspace.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    else{
+                        Toast.makeText(Workspace.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    Toast.makeText(Workspace.this, "Failure", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -80,7 +130,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                         fragmentTransaction1.replace(R.id.nav_host_fragment,groups).commit();
                         break;
                 }
-                return false;
+               return true;
             }
         });
     }
@@ -88,8 +138,6 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
                 case R.id.home_navigate:
-                    intent=getIntent();
-                    String token=intent.getStringExtra("token");
                     FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
                     YourStuff yourStuff=new YourStuff();
                     Bundle data=new Bundle();
@@ -97,6 +145,36 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                     yourStuff.setArguments(data);
                     fragmentTransaction.replace(R.id.nav_host_fragment,yourStuff).commit();
                     break;
+            case R.id.private_navigate:
+                Intent i = new Intent(Workspace.this, PrivateShares.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.public_navigate:
+                i=new Intent(Workspace.this,PublicShares.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.fav_navigate:
+                i=new Intent(Workspace.this,Favorites.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.shared_navigate:
+                i=new Intent(Workspace.this,SharedWithYou.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.trash_navigate:
+                i=new Intent(Workspace.this,Trash.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
+            case R.id.incoming_navigate:
+                i=new Intent(Workspace.this,Incoming.class);
+                i.putExtra("token",token);
+                startActivity(i);
+                break;
         }
         return true;
     }
@@ -111,6 +189,4 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
         else
             super.onBackPressed();
     }
-
-
 }

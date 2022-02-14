@@ -42,7 +42,7 @@ public class Incoming extends AppCompatActivity {
         navigationView=findViewById(R.id.navigationview);
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
-        extendedFloatingActionButton.show();
+        extendedFloatingActionButton.hide();
         extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,17 +58,15 @@ public class Incoming extends AppCompatActivity {
                 }
             }
         });
-        String  actionbartittle=getIntent().getStringExtra("name");
-        getSupportActionBar().setTitle(actionbartittle);
+        getSupportActionBar().setTitle("Incoming");
         token=getIntent().getStringExtra("token");
         final String ss=token;
-        uuid=getIntent().getStringExtra("groupuuid");
         dataview=findViewById(R.id.folderslist);
         dataArrayList=new ArrayList<>();
-        dataAdapter=new DataAdapter(dataArrayList,Incoming.this,token);
+        dataAdapter=new DataAdapter(dataArrayList,Incoming.this,token,"","");
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
-        uuid="incoming:"+uuid;
+        uuid="incoming";
         getfolders(ss,uuid);
         dataAdapter.notifyDataSetChanged();
     }
@@ -84,7 +82,7 @@ public class Incoming extends AppCompatActivity {
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }

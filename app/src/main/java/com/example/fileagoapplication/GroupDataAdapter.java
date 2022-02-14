@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -39,6 +41,32 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
     public void onBindViewHolder(@NonNull GroupDataAdapter.ViewHolder holder, int position) {
         data data=dataArrayList.get(position);
         holder.foldername.setText(data.getName());
+        if(data.getType().equals("File")){
+            String filename = data.getName();
+            String filenameArray[] = filename.split("\\.");
+            String extension = filenameArray[filenameArray.length-1];
+            System.out.println(extension);
+            if(extension.equals("pdf")) {
+                holder.folderimage.setImageResource(R.drawable.ic_pdflogo);
+            }
+            else if(extension.equals("jpg") || extension.equals("png")){
+                holder.folderimage.setImageResource(R.drawable.imageicon);
+            }
+            else if(extension.equals("txt")){
+                holder.folderimage.setImageResource(R.drawable.ic_pdflogo);
+            }
+            else if(extension.equals("")){
+                holder.folderimage.setImageResource(R.drawable.ic_folder);
+            }
+        }
+        holder.popupmenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popupMenu=new PopupMenu(context,view);
+                popupMenu.getMenuInflater().inflate(R.menu.popupoptions,popupMenu.getMenu());
+                popupMenu.show();
+            }
+        });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,9 +88,16 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         private TextView foldername;
+        private ImageView popupmenu;
+        private ImageView folderimage;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            folderimage=itemView.findViewById(R.id.folder_image);
             foldername=itemView.findViewById(R.id.foldername);
+            popupmenu=itemView.findViewById(R.id.moreoptions);
+
+
         }
     }
 }

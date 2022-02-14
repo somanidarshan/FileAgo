@@ -1,14 +1,18 @@
 package com.example.fileagoapplication;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -28,6 +32,7 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
     private ArrayList<data> dataArrayList;
     private GroupDataAdapter dataAdapter;
     private String token;
+    private String actionbartittle;
     private String component;
     private NavigationView navigationView;
     private Boolean isfalse;
@@ -61,13 +66,19 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
                 }
             }
         });
-        String  actionbartittle=getIntent().getStringExtra("name");
+          actionbartittle=getIntent().getStringExtra("name");
         getSupportActionBar().setTitle(actionbartittle);
         groupuuid=getIntent().getStringExtra("groupuuid");
         token=getIntent().getStringExtra("token");
         final String ss=token;
         uuid=getIntent().getStringExtra("uuid");
         dataview=findViewById(R.id.folderslist);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createnewfolderfunction(token,uuid);
+            }
+        });
         dataArrayList=new ArrayList<>();
         component=getIntent().getStringExtra("components");
         components.setTitle(component);
@@ -76,6 +87,45 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
         dataview.setAdapter(dataAdapter);
         getfolders(ss,uuid);
         dataAdapter.notifyDataSetChanged();
+    }
+    private void createnewfolderfunction(String token, String uuid) {
+      AlertDialog.Builder  dialogBuilder=new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Enter the Name of the Folder");
+        final EditText foldername=new EditText(RecursiveGroupDatalist.this);
+        foldername.setInputType(InputType.TYPE_CLASS_TEXT);
+        dialogBuilder.setView(foldername);
+        dialogBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DIRNAME dirname = new DIRNAME();
+                dirname.setFoldername(foldername.getText().toString());
+                Call<Void> call=RetrofitClient.getApiInterface().createfolder("Bearer "+token,uuid,dirname);
+
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if(response.isSuccessful()) {
+                            Toast.makeText(RecursiveGroupDatalist.this, "Success", Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+                            Toast.makeText(RecursiveGroupDatalist.this, "Something went Wrong!!Please Try again!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(RecursiveGroupDatalist.this, "Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        dialogBuilder.show();
     }
     private void getfolders(String token, String uuid) {
         retrofit2.Call<PersonalWorkspace> call=RetrofitClient.getApiInterface().getalldata("Bearer "+token,uuid);
@@ -89,7 +139,7 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -106,47 +156,47 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.private_navigate:
-                Toast.makeText(RecursiveGroupDatalist.this, "Private ShARES CLICKED", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(RecursiveGroupDatalist.this, PrivateShares.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
                 startActivity(i);
                 break;
             case R.id.public_navigate:
-                Toast.makeText(RecursiveGroupDatalist.this, "Private ShARES CLICKED", Toast.LENGTH_SHORT).show();
                 i=new Intent(RecursiveGroupDatalist.this,PublicShares.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
                 startActivity(i);
                 break;
             case R.id.fav_navigate:
-                Toast.makeText(RecursiveGroupDatalist.this, "Private ShARES CLICKED", Toast.LENGTH_SHORT).show();
                 i=new Intent(RecursiveGroupDatalist.this,Favorites.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
                 startActivity(i);
                 break;
             case R.id.shared_navigate:
-                Toast.makeText(RecursiveGroupDatalist.this, "Private ShARES CLICKED", Toast.LENGTH_SHORT).show();
                 i=new Intent(RecursiveGroupDatalist.this,SharedWithYou.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
                 startActivity(i);
                 break;
             case R.id.trash_navigate:
-                Toast.makeText(RecursiveGroupDatalist.this, "Private ShARES CLICKED", Toast.LENGTH_SHORT).show();
                 i=new Intent(RecursiveGroupDatalist.this,Trash.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
                 startActivity(i);
                 break;
             case R.id.incoming_navigate:
-                Toast.makeText(RecursiveGroupDatalist.this, "Private ShARES CLICKED", Toast.LENGTH_SHORT).show();
                 i=new Intent(RecursiveGroupDatalist.this,Incoming.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
                 startActivity(i);
                 break;
+            case R.id.home_navigate:
+                i=new Intent(RecursiveGroupDatalist.this,GroupDataOnce.class);
+                i.putExtra("token",token);
+                i.putExtra("uuid",groupuuid);
+                i.putExtra("name",actionbartittle);
+                startActivity(i);
         }
         return true;
     }

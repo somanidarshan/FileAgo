@@ -3,6 +3,8 @@
     package="com.example.fileagoapplication">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -11,6 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FileAgoApplication">
+        <activity
+            android:name=".UploadFilestoServer"
+            android:exported="false" />
         <activity
             android:name=".Incoming"
             android:exported="false" />

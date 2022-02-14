@@ -1,8 +1,11 @@
 package com.example.fileagoapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,7 +20,9 @@ public class HomeActivity extends AppCompatActivity {
     EditText email;
     EditText password;
     Button btn;
+    LoginRequest loginRequest;
     ImageView imagelogo;
+    SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +31,15 @@ public class HomeActivity extends AppCompatActivity {
         password=findViewById(R.id.password);
         btn=findViewById(R.id.signbtn);
         imagelogo=findViewById(R.id.logo);
+        sharedPreferences=getSharedPreferences("session",MODE_PRIVATE);
+        String emailid=sharedPreferences.getString("email",null);
+        String pass=sharedPreferences.getString("pass",null);
+        if(emailid!=null){
+            Intent i=new Intent(HomeActivity.this,Workspace.class);
+            sharedPreferences.edit().putString("emailid",emailid).apply();
+            sharedPreferences.edit().putString("pass",pass).apply();
+            startActivity(i);
+        }
         btn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 sendPostRequest();
@@ -33,24 +47,24 @@ public class HomeActivity extends AppCompatActivity {
         });
        }
     private void sendPostRequest() {
-        LoginRequest loginRequest=new LoginRequest();
+        loginRequest=new LoginRequest();
         loginRequest.setUsername(email.getText().toString());
         loginRequest.setPassword(password.getText().toString());
-
         Call<User> call=RetrofitClient.getApiInterface().userlogin(loginRequest);
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if(response.isSuccessful()) {
-                    String sta=response.body().getStatus();
-                    Log.e("onResponse: ",sta);
+                    String sta = response.body().getStatus();
+                    Log.e("onResponse: ", sta);
                     if (sta.equals("success")) {
-                        String token=response.body().getToken();
-                        Intent intent=new Intent(HomeActivity.this,Workspace.class);
-                        intent.putExtra("token",token);
+                        String token = response.body().getToken();
+                        sharedPreferences.edit().putString("email",email.getText().toString()).apply();
+                        sharedPreferences.edit().putString("pass",password.getText().toString()).apply();
+                        sharedPreferences.edit().putString("token",token).apply();
+                        Intent intent = new Intent(HomeActivity.this, Workspace.class);
                         Log.i(token, "onResponse: ");
                         startActivity(intent);
-                        Toast.makeText(HomeActivity.this, "Logged in success", Toast.LENGTH_SHORT).show();
                     }
                     else{
                         Toast.makeText(HomeActivity.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();

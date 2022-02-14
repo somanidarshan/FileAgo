@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Rename"
+        android:id="@+id/option_rename" />
+    <item android:title="Download"
+        android:id="@+id/options_download"
+       />
+    <item android:title="Move"
+        android:id="@+id/option_move"
+        />
+    <item android:title="Delete"
+        android:id="@+id/option_delete"
+        />
+    <item android:title="Add to Favurites"
+        android:id="@+id/option_fav"
+        />
+</menu>
