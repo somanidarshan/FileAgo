@@ -1,8 +1,10 @@
 package com.example.fileagoapplication;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,14 +19,16 @@ import java.util.ArrayList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-public class PrivateShares extends AppCompatActivity {
+public class PrivateShares extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private String uuid;
     private FloatingActionButton extendedFloatingActionButton;
     private FloatingActionButton fab1,fab2;
     private RecyclerView dataview;
     private ArrayList<data> dataArrayList;
     private DataAdapter dataAdapter;
+    private String fileaccesskey;
     private String token;
+    private String msg;
     private NavigationView navigationView;
     private Boolean isfalse;
     @Override
@@ -38,7 +42,7 @@ public class PrivateShares extends AppCompatActivity {
         extendedFloatingActionButton=findViewById(R.id.actions);
         isfalse=false;
         navigationView=findViewById(R.id.navigationview);
-        //navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(this);
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
         extendedFloatingActionButton.hide();
@@ -57,16 +61,23 @@ public class PrivateShares extends AppCompatActivity {
                 }
             }
         });
+        fileaccesskey=getIntent().getStringExtra("filekey");
         getSupportActionBar().setTitle("Private Shares");
+        uuid=getIntent().getStringExtra("groupuuid");
         token=getIntent().getStringExtra("token");
         final String ss=token;
+        msg=getIntent().getStringExtra("group");
         dataview=findViewById(R.id.folderslist);
         dataArrayList=new ArrayList<>();
-        dataAdapter=new DataAdapter(dataArrayList,PrivateShares.this,token,"","");
+        dataAdapter=new DataAdapter(dataArrayList,PrivateShares.this,token,"","",fileaccesskey);
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
-        uuid="private_shares";
-        getfolders(ss,uuid);
+        if(msg!=null){
+            getfolders(ss,"private_shares:"+uuid);
+        }
+        else{
+            getfolders(ss,"private_shares");
+        }
         dataAdapter.notifyDataSetChanged();
     }
     private void getfolders(String token, String uuid) {
@@ -81,7 +92,7 @@ public class PrivateShares extends AppCompatActivity {
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType(),folders.get(i).getUpdated(),folders.get(i).getSize()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -93,5 +104,69 @@ public class PrivateShares extends AppCompatActivity {
             public void onFailure(Call<PersonalWorkspace> call, Throwable t) {
             }
         });
+    }
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.private_navigate:
+                Intent i = new Intent(PrivateShares.this, PrivateShares.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.public_navigate:
+                i=new Intent(PrivateShares.this,PublicShares.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.fav_navigate:
+                i=new Intent(PrivateShares.this,Favorites.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.shared_navigate:
+                i=new Intent(PrivateShares.this,SharedWithYou.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.trash_navigate:
+                i=new Intent(PrivateShares.this,Trash.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.incoming_navigate:
+                i=new Intent(PrivateShares.this,Incoming.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.home_navigate:
+                if(msg!=null) {
+                    i = new Intent(PrivateShares.this, GroupDataOnce.class);
+                    i.putExtra("token", token);
+                    i.putExtra("uuid", uuid);
+                    i.putExtra("name", "Home");
+                    startActivity(i);finish();
+                    break;
+                }
+                else{
+                    Intent intent=new Intent(PrivateShares.this,Workspace.class);
+                    intent.putExtra("token",token);
+                    startActivity(intent);
+                    finish();
+                    break;
+                }
+        }
+        return true;
     }
 }

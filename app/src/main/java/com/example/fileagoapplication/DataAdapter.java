@@ -1,9 +1,16 @@
 package com.example.fileagoapplication;
+import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricManager;
 import android.media.Image;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,40 +23,95 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
+import okhttp3.ResponseBody;
+import okio.BufferedSink;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Url;
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private ArrayList<data> dataArrayList;
     private Context context;
+    private String fileaccesskey;
     private String token;
+    private Long updated;
     private AlertDialog.Builder dialogBuilder;
     private String prevuuid;
     private String actionbartitle;
-    public DataAdapter(ArrayList<data> dataArrayList, Context context, String token,String prevuuid,String actionbartitle) {
+    private long size;
+    public DataAdapter(ArrayList<data> dataArrayList, Context context, String token,String prevuuid,String actionbartitle,String fileaccesskey) {
         this.dataArrayList = dataArrayList;
         this.context = context;
         this.token = token;
         this.prevuuid=prevuuid;
         this.actionbartitle=actionbartitle;
+        this.fileaccesskey=fileaccesskey;
     }
-
     @NonNull
     @Override
     public DataAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.dataview,parent,false);
         return new DataAdapter.ViewHolder(view);
     }
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull DataAdapter.ViewHolder holder, int position) {
             data data=dataArrayList.get(position);
-            holder.foldername.setText(data.getName());
+            String shortfoldername="";
+            if(data.getName().length()>25){
+                for(int i=0;i<10;i++){
+                    shortfoldername+=data.getName().charAt(i);
+                }
+                shortfoldername+="...";
+                for(int j=data.getName().length()-7;j<data.getName().length();j++){
+                    shortfoldername+=data.getName().charAt(j);
+                }
+                holder.foldername.setText(shortfoldername);
+            }
+            else {
+                holder.foldername.setText(data.getName());
+            }
+            updated=data.getUpdated();
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            SimpleDateFormat simpletimeFormat=new SimpleDateFormat("dd/MM/yyyy",Locale.getDefault());
+            String date=simpleDateFormat.format(updated);
+            String time=simpletimeFormat.format(updated);
+            String combine=time+" "+date;
+            holder.updatedtext.setText(combine);
+
             if(data.getType().equals("File")){
                 String filename = data.getName();
                 String filenameArray[] = filename.split("\\.");
@@ -67,6 +129,29 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 else if(extension.equals("")){
                     holder.folderimage.setImageResource(R.drawable.ic_folder);
                 }
+                size=data.getSize();
+                String filessize= "";
+                if (size >= 1073741824) {
+                    filessize= (size / 1073741824)+ " GB";
+                }
+                if (size >= 1048576) {
+                    filessize= (size / 1048576) + " MB";
+                }
+                if (size >= 1024) {
+                    filessize= (size / 1024)+ " KB";
+                }
+                else {
+                    filessize= size + " Bytes";
+                }
+                holder.filesize.setText(filessize);
+
+                /*
+                if (size >= 1073741824) { return (size / 1073741824).toFixed(decimal) + " GB" }
+                if (size >= 1048576) { return (size / 1048576).toFixed(decimal) + " MB" }
+                if (size >= 1024) { return (size / 1024).toFixed(decimal) + " KB" }
+                return size.toString() + " Bytes";
+                */
+
             }
             holder.popupmenu.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -74,6 +159,28 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                     PopupMenu popupMenu=new PopupMenu(context,view);
                     popupMenu.getMenuInflater().inflate(R.menu.popupoptions,popupMenu.getMenu());
                     popupMenu.show();
+                    Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess(token,data.getUuid());
+                    call.enqueue(new Callback<MyAccessWorkspace>() {
+                        @Override
+                        public void onResponse(Call<MyAccessWorkspace> call, Response<MyAccessWorkspace> response) {
+                            if(response.isSuccessful()){
+                                MyAccessWorkspace myAccessWorkspace=response.body();
+                                String[] access=myAccessWorkspace.getData();
+                                Set<String> ss=new HashSet();
+                                for(int i=0;i<access.length;i++){
+                                    ss.add(access[i]);
+                                }
+                                if(ss.contains("download")){
+                                    popupMenu.getMenu().findItem(R.id.options_download).setVisible(false);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<MyAccessWorkspace> call, Throwable t) {
+
+                        }
+                    });
                     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem menuItem) {
@@ -91,7 +198,9 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                                     rename(data.getUuid(),token,prevuuid,actionbartitle);
                                     break;
                                 case R.id.options_download:
+
                                     Toast.makeText(context, "Download Clicked", Toast.LENGTH_SHORT).show();
+                                    downloadfile(data.getUuid(),data.getName(),fileaccesskey,token);
                                     break;
                                 case R.id.option_fav:
                                     addtofav(data.getUuid(),token);
@@ -109,9 +218,45 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                     i.putExtra("name",data.getName());
                     i.putExtra("uuid",data.getUuid());
                     i.putExtra("token",token);
+                    i.putExtra("filekey",fileaccesskey);
                     context.startActivity(i);
                 }
             });
+    }
+    private void downloadfile(String uuid, String name, String fileaccesskey,String token) {
+        String filename=name;
+        name=URLEncoder.encode(name);
+        System.out.println(name);
+        Call<ResponseBody> call=RetrofitClient.getApiInterface().downloadfile(fileaccesskey,uuid,name);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+                        }
+                    }
+                    String u = "https://ocean.fileago.com/resources/auth/download/" + fileaccesskey + "/" + uuid + "/999999999999999/" + filename;
+                    DownloadManager.Request request=new DownloadManager.Request(Uri.parse(u));
+                    request.setTitle(filename);
+                    request.setDescription("Downloading "+filename);
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.allowScanningByMediaScanner();
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,filename);
+                    DownloadManager dm= (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                    dm.enqueue(request);
+                        Toast.makeText(context, "Downloaded", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(context, "Error in Downloading", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override
@@ -123,11 +268,15 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         private TextView foldername;
         private ImageView popupmenu;
         private ImageView folderimage;
+        private TextView updatedtext;
+        private TextView filesize;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             folderimage=itemView.findViewById(R.id.folder_image);
             foldername=itemView.findViewById(R.id.foldername);
             popupmenu=itemView.findViewById(R.id.moreoptions);
+            updatedtext=itemView.findViewById(R.id.updated);
+            filesize=itemView.findViewById(R.id.filesize);
         }
     }
 
@@ -202,7 +351,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             }
         });
           dialogBuilder.show();
-
     }
 
     private void addtofav(String uuid, String token) {
@@ -215,12 +363,10 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                     Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+
             }
         });
     }
-
-
 }

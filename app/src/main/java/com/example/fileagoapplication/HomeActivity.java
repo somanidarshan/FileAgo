@@ -1,6 +1,7 @@
 package com.example.fileagoapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,13 +33,15 @@ public class HomeActivity extends AppCompatActivity {
         btn=findViewById(R.id.signbtn);
         imagelogo=findViewById(R.id.logo);
         sharedPreferences=getSharedPreferences("session",MODE_PRIVATE);
+        String fileaccesskey=sharedPreferences.getString("filekey",null);
         String emailid=sharedPreferences.getString("email",null);
         String pass=sharedPreferences.getString("pass",null);
-        if(emailid!=null){
+        if(emailid!=null && fileaccesskey!=null){
             Intent i=new Intent(HomeActivity.this,Workspace.class);
             sharedPreferences.edit().putString("emailid",emailid).apply();
             sharedPreferences.edit().putString("pass",pass).apply();
             startActivity(i);
+            finish();
         }
         btn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
@@ -59,12 +62,15 @@ public class HomeActivity extends AppCompatActivity {
                     Log.e("onResponse: ", sta);
                     if (sta.equals("success")) {
                         String token = response.body().getToken();
+                        String fileaccesskey=response.body().getFileaccesskey();
                         sharedPreferences.edit().putString("email",email.getText().toString()).apply();
                         sharedPreferences.edit().putString("pass",password.getText().toString()).apply();
                         sharedPreferences.edit().putString("token",token).apply();
+                        sharedPreferences.edit().putString("filekey",fileaccesskey).apply();
                         Intent intent = new Intent(HomeActivity.this, Workspace.class);
                         Log.i(token, "onResponse: ");
                         startActivity(intent);
+                        finish();
                     }
                     else{
                         Toast.makeText(HomeActivity.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();

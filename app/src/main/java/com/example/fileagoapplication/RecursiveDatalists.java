@@ -39,12 +39,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.http.POST;
 public class RecursiveDatalists extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
     private String uuid;
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
     private String  actionbartittle;
     private EditText foldername;
+    private String fileaccesskey;
     private Button createfolder,cancel;
     private FloatingActionButton extendedFloatingActionButton;
     private FloatingActionButton fab1,fab2;
@@ -64,7 +64,6 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         fab2=findViewById(R.id.createfolder);
         fab1.hide();
         fab2.hide();
-
         extendedFloatingActionButton=findViewById(R.id.actions);
         isfalse=false;
         navigationView=findViewById(R.id.navigationview);
@@ -88,7 +87,7 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                 }
             }
         });
-
+        fileaccesskey=getIntent().getStringExtra("filekey");
         actionbartittle=getIntent().getStringExtra("name");
         getSupportActionBar().setTitle(actionbartittle);
         token=getIntent().getStringExtra("token");
@@ -114,7 +113,7 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
             }
         });
         dataArrayList=new ArrayList<>();
-        dataAdapter=new DataAdapter(dataArrayList,RecursiveDatalists.this,token,uuid,actionbartittle);
+        dataAdapter=new DataAdapter(dataArrayList,RecursiveDatalists.this,token,uuid,actionbartittle,fileaccesskey);
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
         getfolders(ss,uuid);
@@ -180,7 +179,7 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType(),folders.get(i).getUpdated(),folders.get(i).getSize()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -235,5 +234,4 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         }
         return true;
     }
-
 }

@@ -1,8 +1,10 @@
 package com.example.fileagoapplication;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-public class Trash extends AppCompatActivity {
+public class Trash extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private String uuid;
     private FloatingActionButton extendedFloatingActionButton;
     private FloatingActionButton fab1,fab2;
@@ -25,6 +27,8 @@ public class Trash extends AppCompatActivity {
     private ArrayList<data> dataArrayList;
     private DataAdapter dataAdapter;
     private String token;
+    private String msg;
+    private String fileaccesskey;
     private NavigationView navigationView;
     private Boolean isfalse;
     @Override
@@ -40,6 +44,7 @@ public class Trash extends AppCompatActivity {
         extendedFloatingActionButton.hide();
         getSupportActionBar().setTitle("Trash");
         navigationView=findViewById(R.id.navigationview);
+        navigationView.setNavigationItemSelectedListener(this);
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
         extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -57,16 +62,22 @@ public class Trash extends AppCompatActivity {
                 }
             }
         });
-
+        fileaccesskey=getIntent().getStringExtra("filekey");
         token=getIntent().getStringExtra("token");
         final String ss=token;
+        uuid=getIntent().getStringExtra("groupuuid");
+        msg=getIntent().getStringExtra("group");
         dataview=findViewById(R.id.folderslist);
         dataArrayList=new ArrayList<>();
-        dataAdapter=new DataAdapter(dataArrayList,Trash.this,token,"","");
+        dataAdapter=new DataAdapter(dataArrayList,Trash.this,token,"","",fileaccesskey);
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
-        uuid="trash";
-        getfolders(ss,uuid);
+        if(msg!=null){
+            getfolders(ss,"trash:"+uuid);
+        }
+        else{
+            getfolders(ss,"trash");
+        }
         dataAdapter.notifyDataSetChanged();
     }
     private void getfolders(String token, String uuid) {
@@ -81,7 +92,7 @@ public class Trash extends AppCompatActivity {
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType(),folders.get(i).getUpdated(),folders.get(i).getSize()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -93,6 +104,69 @@ public class Trash extends AppCompatActivity {
             public void onFailure(Call<PersonalWorkspace> call, Throwable t) {
             }
         });
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.private_navigate:
+                Intent i = new Intent(Trash.this, PrivateShares.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.public_navigate:
+                i=new Intent(Trash.this,PublicShares.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.fav_navigate:
+                i=new Intent(Trash.this,Favorites.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.shared_navigate:
+                i=new Intent(Trash.this,SharedWithYou.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.trash_navigate:
+                i=new Intent(Trash.this,Trash.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.incoming_navigate:
+                i=new Intent(Trash.this,Incoming.class);
+                i.putExtra("token",token);
+                i.putExtra("groupuuid",uuid);
+                i.putExtra("group",msg);
+                startActivity(i);finish();
+                break;
+            case R.id.home_navigate:
+                if(msg!=null){
+                i=new Intent(Trash.this,GroupDataOnce.class);
+                i.putExtra("token",token);
+                i.putExtra("uuid",uuid);
+                i.putExtra("name","Home");
+                startActivity(i);finish();
+                break;}
+                else{
+                    Intent intent=new Intent(Trash.this,Workspace.class);
+                    intent.putExtra("token",token);
+                    startActivity(intent);finish();
+                    break;
+                }
+        }
+        return true;
     }
 }
 

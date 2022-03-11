@@ -34,6 +34,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
     NavigationView navigationView;
     DrawerLayout drawerLayout;
     private Intent intent;
+    String fileaccesskey;
     private String token;
     private  LoginRequest loginRequest;
     private ActionBarDrawerToggle toggle;
@@ -67,6 +68,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
         MenuItem components=menu.findItem(R.id.componentname);
         String emailid=sharedPreferences.getString("emailid",null);
         String password=sharedPreferences.getString("pass",null);
+
         if(emailid!=null){
             loginRequest=new LoginRequest();
             loginRequest.setUsername(emailid);
@@ -80,12 +82,14 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                         Log.e("onResponse: ", sta);
                         if (sta.equals("success")) {
                            token=response.body().getToken();
+                           fileaccesskey=response.body().getFileaccesskey();
                             FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
                             YourStuff yourStuff=new YourStuff();
                             components.setTitle("Your Stuff");
                             getSupportActionBar().setTitle("Your Stuff");
                             Bundle data=new Bundle();
                             data.putString("token",token);
+                            data.putString("filekey",fileaccesskey);
                             yourStuff.setArguments(data);
                             fragmentTransaction.replace(R.id.nav_host_fragment,yourStuff).commit();
                         }
@@ -116,6 +120,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                         getSupportActionBar().setTitle("Your Stuff");
                         Bundle data=new Bundle();
                         data.putString("token",token);
+                        data.putString("filekey",fileaccesskey);
                         yourStuff.setArguments(data);
                         fragmentTransaction.replace(R.id.nav_host_fragment,yourStuff).commit();
                         break;

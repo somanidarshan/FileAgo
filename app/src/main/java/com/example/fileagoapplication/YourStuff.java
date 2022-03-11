@@ -36,6 +36,7 @@ public class YourStuff extends Fragment {
     private ArrayList<data> dataArrayList;
     private DataAdapter dataAdapter;
     Boolean isfalse;
+    private String fileaccesskey;
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
     @Override
@@ -68,6 +69,7 @@ public class YourStuff extends Fragment {
         Bundle data=getArguments();
         if(data!=null){
             string =data.getString("token");
+            fileaccesskey=data.getString("filekey");
         }
         String home="home";
         fab2.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +79,7 @@ public class YourStuff extends Fragment {
             }
         });
         dataArrayList=new ArrayList<>();
-        dataAdapter=new DataAdapter(dataArrayList,getContext(),string,"","");
+        dataAdapter=new DataAdapter(dataArrayList,getContext(),string,"","",fileaccesskey);
         dataview.setLayoutManager(new LinearLayoutManager(getContext()));
         dataview.setAdapter(dataAdapter);
         getData(string);
@@ -144,7 +146,7 @@ public class YourStuff extends Fragment {
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType(),folders.get(i).getUpdated(),folders.get(i).getSize()));
                     }
                     dataAdapter.notifyDataSetChanged();
 

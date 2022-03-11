@@ -139,7 +139,7 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType(),folders.get(i).getUpdated(),folders.get(i).getSize()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -159,36 +159,42 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
                 Intent i = new Intent(RecursiveGroupDatalist.this, PrivateShares.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.public_navigate:
                 i=new Intent(RecursiveGroupDatalist.this,PublicShares.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.fav_navigate:
                 i=new Intent(RecursiveGroupDatalist.this,Favorites.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.shared_navigate:
                 i=new Intent(RecursiveGroupDatalist.this,SharedWithYou.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.trash_navigate:
                 i=new Intent(RecursiveGroupDatalist.this,Trash.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.incoming_navigate:
                 i=new Intent(RecursiveGroupDatalist.this,Incoming.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.home_navigate:

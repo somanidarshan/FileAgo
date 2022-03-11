@@ -143,7 +143,7 @@ public class GroupDataOnce extends AppCompatActivity implements NavigationView.O
                     String status=response.body().getStatus();
                     System.out.println(status);
                     for(int i=0;i<folders.size();i++){
-                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType()));
+                        dataArrayList.add(new data(folders.get(i).getName(),folders.get(i).getUuid(),folders.get(i).getType(),folders.get(i).getUpdated(),folders.get(i).getSize()));
                     }
                     dataAdapter.notifyDataSetChanged();
                 }
@@ -164,42 +164,52 @@ public class GroupDataOnce extends AppCompatActivity implements NavigationView.O
                  i=new Intent(GroupDataOnce.this,PrivateShares.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.public_navigate:
                  i=new Intent(GroupDataOnce.this,PublicShares.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.fav_navigate:
                  i=new Intent(GroupDataOnce.this,Favorites.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
+
                 startActivity(i);
                 break;
             case R.id.shared_navigate:
                 i=new Intent(GroupDataOnce.this,SharedWithYou.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
+
                 startActivity(i);
                 break;
             case R.id.trash_navigate:
                 i=new Intent(GroupDataOnce.this,Trash.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
+
                 startActivity(i);
                 break;
             case R.id.incoming_navigate:
                 i=new Intent(GroupDataOnce.this,Incoming.class);
                 i.putExtra("token",token);
                 i.putExtra("groupuuid",groupuuid);
+                i.putExtra("group","group");
                 startActivity(i);
                 break;
             case R.id.home_navigate:
                 i=new Intent(GroupDataOnce.this,GroupDataOnce.class);
                 i.putExtra("token",token);
                 i.putExtra("uuid",groupuuid);
+                i.putExtra("group","group");
                 i.putExtra("groupname",actionbartittle);
                 startActivity(i);
 
