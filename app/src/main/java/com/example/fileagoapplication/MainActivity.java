@@ -1,5 +1,4 @@
 package com.example.fileagoapplication;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,13 +7,13 @@ import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.webkit.WebView;
-
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide();
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         new Handler().postDelayed(new Runnable() {
@@ -24,6 +23,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i);
                 finish();
             }
-        },3000);
+        },2000);
     }
 }

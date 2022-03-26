@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,10 +34,21 @@ public class HomeActivity extends AppCompatActivity {
         password=findViewById(R.id.password);
         btn=findViewById(R.id.signbtn);
         imagelogo=findViewById(R.id.logo);
+        String Logout=getIntent().getStringExtra("Logout");
+
         sharedPreferences=getSharedPreferences("session",MODE_PRIVATE);
         String fileaccesskey=sharedPreferences.getString("filekey",null);
         String emailid=sharedPreferences.getString("email",null);
         String pass=sharedPreferences.getString("pass",null);
+        if(Logout!=null && Logout.equals("Logout")){
+                fileaccesskey=null;
+                emailid=null;
+            sharedPreferences.edit().putString("email",null).apply();
+            sharedPreferences.edit().putString("pass",null).apply();
+            sharedPreferences.edit().putString("token",null).apply();
+            sharedPreferences.edit().putString("filekey",null).apply();
+
+        }
         if(emailid!=null && fileaccesskey!=null){
             Intent i=new Intent(HomeActivity.this,Workspace.class);
             sharedPreferences.edit().putString("emailid",emailid).apply();

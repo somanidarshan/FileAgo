@@ -33,6 +33,8 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,22 +73,6 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
         components.setTitle("Your Stuff");
-        extendedFloatingActionButton.show();
-        extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isfalse) {
-                    fab1.show();
-                    fab2.show();
-                    isfalse = true;
-                }
-                else{
-                    fab1.hide();
-                    fab2.hide();
-                    isfalse=false;
-                }
-            }
-        });
         fileaccesskey=getIntent().getStringExtra("filekey");
         actionbartittle=getIntent().getStringExtra("name");
         getSupportActionBar().setTitle(actionbartittle);
@@ -96,7 +82,45 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         dataview=findViewById(R.id.folderslist);
         foldername=findViewById(R.id.foldername);
         createfolder=findViewById(R.id.createbutton);
+        Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess("Bearer "+token,uuid);
+        call.enqueue(new Callback<MyAccessWorkspace>() {
+            @Override
+            public void onResponse(Call<MyAccessWorkspace> call, Response<MyAccessWorkspace> response) {
+                if(response.isSuccessful()){
+                    MyAccessWorkspace myAccessWorkspace=response.body();
+                    String[] access=myAccessWorkspace.getData();
+                    Set<String> ss=new HashSet();
+                    Log.e("MYAccess",access[1]);
+                    for(int i=0;i<access.length;i++){
+                        ss.add(access[i]);
+                    }
+                    if(!ss.contains("write")){
+                            extendedFloatingActionButton.hide();
+                    }
+                    else{
+                        extendedFloatingActionButton.show();
 
+                        extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (!isfalse) {
+                                    fab1.show();
+                                    fab2.show();
+                                    isfalse = true;
+                                } else {
+                                    fab1.hide();
+                                    fab2.hide();
+                                    isfalse = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<MyAccessWorkspace> call, Throwable t) {
+            }
+        });
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,7 +133,10 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                 Intent i=new Intent(RecursiveDatalists.this,UploadFilestoServer.class);
                 i.putExtra("token",token);
                 i.putExtra("uuid",uuid);
+                i.putExtra("name",actionbartittle);
+                i.putExtra("filekey",fileaccesskey);
                 startActivity(i);
+                finish();
             }
         });
         dataArrayList=new ArrayList<>();
@@ -230,6 +257,12 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                 Intent intent=new Intent(RecursiveDatalists.this,Workspace.class);
                 intent.putExtra("token",token);
                 startActivity(intent);
+                break;
+            case R.id.logout_navigate:
+                Intent intent2=new Intent(RecursiveDatalists.this,HomeActivity.class);
+                intent2.putExtra("Logout","Logout");
+                startActivity(intent2);
+                finish();
                 break;
         }
         return true;

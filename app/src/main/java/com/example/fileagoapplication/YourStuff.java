@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,27 +53,65 @@ public class YourStuff extends Fragment {
         fab2.hide();
         extendedFloatingActionButton=view.findViewById(R.id.actions);
         isfalse=false;
-       extendedFloatingActionButton.show();
-        extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isfalse) {
-                    fab1.show();
-                    fab2.show();
-                    isfalse = true;
-                }
-                else{
-                    fab1.hide();
-                    fab2.hide();
-                    isfalse=false;
-                }
-            }
-        });
         Bundle data=getArguments();
         if(data!=null){
             string =data.getString("token");
             fileaccesskey=data.getString("filekey");
         }
+        String uuid="home";
+        Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess("Bearer "+string,uuid);
+        call.enqueue(new Callback<MyAccessWorkspace>() {
+            @Override
+            public void onResponse(Call<MyAccessWorkspace> call, Response<MyAccessWorkspace> response) {
+                if(response.isSuccessful()){
+                    MyAccessWorkspace myAccessWorkspace=response.body();
+                    String[] access=myAccessWorkspace.getData();
+                    Set<String> ss=new HashSet();
+                    Log.e("MYAccess",access[1]);
+                    for(int i=0;i<access.length;i++){
+                        ss.add(access[i]);
+                    }
+                    if(!ss.contains("write")){
+                        extendedFloatingActionButton.hide();
+                    }
+                    else{
+                        extendedFloatingActionButton.show();
+
+                        extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (!isfalse) {
+                                    fab1.show();
+                                    fab2.show();
+                                    isfalse = true;
+                                } else {
+                                    fab1.hide();
+                                    fab2.hide();
+                                    isfalse = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<MyAccessWorkspace> call, Throwable t) {
+            }
+        });
+
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i=new Intent(getContext(),UploadFilestoServer.class);
+                i.putExtra("token",string);
+                i.putExtra("uuid",uuid);
+                i.putExtra("name","Your Stuff");
+                i.putExtra("filekey",fileaccesskey);
+                startActivity(i);
+
+            }
+        });
+
         String home="home";
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override

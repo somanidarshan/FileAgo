@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.biometrics.BiometricManager;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +32,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -64,8 +67,12 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Url;
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private ArrayList<data> dataArrayList;
+    private Boolean isSelected =false;
+    private ArrayList<data> selecteditems=new ArrayList<>();
     private Context context;
     private String fileaccesskey;
+    private FloatingActionButton extendedFloatingActionButton;
+    private FloatingActionButton fab1,fab2;
     private String token;
     private Long updated;
     private AlertDialog.Builder dialogBuilder;
@@ -91,12 +98,12 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull DataAdapter.ViewHolder holder, int position) {
             data data=dataArrayList.get(position);
             String shortfoldername="";
-            if(data.getName().length()>25){
-                for(int i=0;i<10;i++){
+            if(data.getName().length()>35){
+                for(int i=0;i<15;i++){
                     shortfoldername+=data.getName().charAt(i);
                 }
                 shortfoldername+="...";
-                for(int j=data.getName().length()-7;j<data.getName().length();j++){
+                for(int j=data.getName().length()-10;j<data.getName().length();j++){
                     shortfoldername+=data.getName().charAt(j);
                 }
                 holder.foldername.setText(shortfoldername);
@@ -111,7 +118,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             String time=simpletimeFormat.format(updated);
             String combine=time+" "+date;
             holder.updatedtext.setText(combine);
-
             if(data.getType().equals("File")){
                 String filename = data.getName();
                 String filenameArray[] = filename.split("\\.");
@@ -125,6 +131,9 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 }
                 else if(extension.equals("txt")){
                     holder.folderimage.setImageResource(R.drawable.ic_pdflogo);
+                }
+                else if(extension.equals("docx")){
+                    holder.folderimage.setImageResource(R.drawable.docs_logo);
                 }
                 else if(extension.equals("")){
                     holder.folderimage.setImageResource(R.drawable.ic_folder);
@@ -153,13 +162,15 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 */
 
             }
-            holder.popupmenu.setOnClickListener(new View.OnClickListener() {
+        holder.popupmenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     PopupMenu popupMenu=new PopupMenu(context,view);
                     popupMenu.getMenuInflater().inflate(R.menu.popupoptions,popupMenu.getMenu());
+                    popupMenu.getMenu().findItem(R.id.options_download).setVisible(false);
+                    popupMenu.getMenu().findItem(R.id.option_delete).setVisible(false);
                     popupMenu.show();
-                    Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess(token,data.getUuid());
+                    Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess("Bearer "+token,data.getUuid());
                     call.enqueue(new Callback<MyAccessWorkspace>() {
                         @Override
                         public void onResponse(Call<MyAccessWorkspace> call, Response<MyAccessWorkspace> response) {
@@ -167,15 +178,19 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                                 MyAccessWorkspace myAccessWorkspace=response.body();
                                 String[] access=myAccessWorkspace.getData();
                                 Set<String> ss=new HashSet();
+                                Log.e("MYAccess",access[0]);
                                 for(int i=0;i<access.length;i++){
                                     ss.add(access[i]);
+                                    Log.e("MYAccess",access[i]);
                                 }
-                                if(ss.contains("download")){
-                                    popupMenu.getMenu().findItem(R.id.options_download).setVisible(false);
+                                if(ss.contains("download") && data.getType().equals("File")){
+                                    popupMenu.getMenu().findItem(R.id.options_download).setVisible(true);
+                                }
+                                if(ss.contains("delete")){
+                                    popupMenu.getMenu().findItem(R.id.option_delete).setVisible(true);
                                 }
                             }
                         }
-
                         @Override
                         public void onFailure(Call<MyAccessWorkspace> call, Throwable t) {
 
@@ -188,7 +203,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                                 case R.id.option_delete:
                                     Toast.makeText(context, "Delete Clicked", Toast.LENGTH_SHORT).show();
                                     delete(data.getUuid(),token,prevuuid,actionbartitle);
-
                                      break;
                                 case R.id.option_move:
                                     Toast.makeText(context, "Move Clicked", Toast.LENGTH_SHORT).show();
@@ -214,12 +228,22 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    if(isSelected==false && data.getType().equals("Dir")){
                     Intent i=new Intent(context,RecursiveDatalists.class);
                     i.putExtra("name",data.getName());
                     i.putExtra("uuid",data.getUuid());
                     i.putExtra("token",token);
                     i.putExtra("filekey",fileaccesskey);
                     context.startActivity(i);
+                    }
+                    else if(data.getType().equals("File")){
+                        Intent i=new Intent(Intent.ACTION_VIEW);
+                        i.setAction(Intent.ACTION_DEFAULT);
+                        String filename = data.getName();
+                        String filenameArray[] = filename.split("\\.");
+                        String extension = filenameArray[filenameArray.length-1];
+                       context.startActivity(Intent.createChooser(i,"Opening File"));
+                    }
                 }
             });
     }
@@ -263,7 +287,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     public int getItemCount() {
         return dataArrayList.size();
     }
-
     public class ViewHolder extends  RecyclerView.ViewHolder{
         private TextView foldername;
         private ImageView popupmenu;
@@ -277,9 +300,46 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             popupmenu=itemView.findViewById(R.id.moreoptions);
             updatedtext=itemView.findViewById(R.id.updated);
             filesize=itemView.findViewById(R.id.filesize);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    isSelected=true;
+                    if(selecteditems.contains(dataArrayList.get(getAdapterPosition()))){
+                        itemView.setBackgroundColor(Color.TRANSPARENT);
+                        selecteditems.remove(dataArrayList.get(getAdapterPosition()));
+                    }
+                    else{
+                            itemView.setBackgroundColor(Color.DKGRAY);
+                            selecteditems.add(dataArrayList.get(getAdapterPosition()));
+                    }
+                    if(selecteditems.size()==0){
+                        return false;
+                    }
+                    return true;
+                }
+            });
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(isSelected){
+                        if(selecteditems.contains(dataArrayList.get(getAdapterPosition()))){
+                            itemView.setBackgroundColor(Color.TRANSPARENT);
+                            selecteditems.remove(dataArrayList.get(getAdapterPosition()));
+                        }
+                        else{
+                            itemView.setBackgroundColor(Color.DKGRAY);
+                            selecteditems.add(dataArrayList.get(getAdapterPosition()));
+                        }
+                        if(selecteditems.size()==0){
+                            isSelected=false;
+                        }
+                    }
+                    else{
+                    }
+                }
+            });
         }
     }
-
     public void delete(String uuid,String token,String prevuuid,String actionbartitle){
         Call<Void> call=RetrofitClient.getApiInterface().deletenode("Bearer "+token,uuid);
         call.enqueue(new Callback<Void>() {

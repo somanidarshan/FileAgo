@@ -180,6 +180,11 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                 i.putExtra("token",token);
                 startActivity(i);
                 break;
+            case R.id.logout_navigate:
+                Intent intent2=new Intent(Workspace.this,HomeActivity.class);
+                intent2.putExtra("Logout","Logout");
+                startActivity(intent2);
+                finish();
         }
         return true;
     }

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,29 +53,52 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
         navigationView.setNavigationItemSelectedListener(this);
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
-        extendedFloatingActionButton.show();
-        extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isfalse) {
-                    fab1.show();
-                    fab2.show();
-                    isfalse = true;
-                }
-                else{
-                    fab1.hide();
-                    fab2.hide();
-                    isfalse=false;
-                }
-            }
-        });
-          actionbartittle=getIntent().getStringExtra("name");
+        actionbartittle=getIntent().getStringExtra("name");
         getSupportActionBar().setTitle(actionbartittle);
         groupuuid=getIntent().getStringExtra("groupuuid");
         token=getIntent().getStringExtra("token");
         final String ss=token;
         uuid=getIntent().getStringExtra("uuid");
         dataview=findViewById(R.id.folderslist);
+        Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess("Bearer "+token,uuid);
+        call.enqueue(new Callback<MyAccessWorkspace>() {
+            @Override
+            public void onResponse(Call<MyAccessWorkspace> call, Response<MyAccessWorkspace> response) {
+                if(response.isSuccessful()){
+                    MyAccessWorkspace myAccessWorkspace=response.body();
+                    String[] access=myAccessWorkspace.getData();
+                    Set<String> ss=new HashSet();
+                    Log.e("MYAccess",access[0]);
+                    for(int i=0;i<access.length;i++){
+                        ss.add(access[i]);
+                    }
+                    if(!ss.contains("write")){
+                        extendedFloatingActionButton.hide();
+                    }
+                    else{
+                        extendedFloatingActionButton.show();
+
+                        extendedFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (!isfalse) {
+                                    fab1.show();
+                                    fab2.show();
+                                    isfalse = true;
+                                } else {
+                                    fab1.hide();
+                                    fab2.hide();
+                                    isfalse = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<MyAccessWorkspace> call, Throwable t) {
+            }
+        });
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -89,7 +115,7 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
         dataAdapter.notifyDataSetChanged();
     }
     private void createnewfolderfunction(String token, String uuid) {
-      AlertDialog.Builder  dialogBuilder=new AlertDialog.Builder(this);
+      AlertDialog.Builder dialogBuilder=new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Enter the Name of the Folder");
         final EditText foldername=new EditText(RecursiveGroupDatalist.this);
         foldername.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -100,7 +126,6 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
                 DIRNAME dirname = new DIRNAME();
                 dirname.setFoldername(foldername.getText().toString());
                 Call<Void> call=RetrofitClient.getApiInterface().createfolder("Bearer "+token,uuid,dirname);
-
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {

@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +31,9 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -67,12 +70,12 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
     public void onBindViewHolder(@NonNull GroupDataAdapter.ViewHolder holder, int position) {
         data data=dataArrayList.get(position);
         String shortfoldername="";
-        if(data.getName().length()>25){
-            for(int i=0;i<14;i++){
+        if(data.getName().length()>36){
+            for(int i=0;i<20;i++){
                 shortfoldername+=data.getName().charAt(i);
             }
-            shortfoldername+="......";
-            for(int j=data.getName().length()-8;j<data.getName().length();j++){
+            shortfoldername+="...";
+            for(int j=data.getName().length()-12;j<data.getName().length();j++){
                 shortfoldername+=data.getName().charAt(j);
             }
             holder.foldername.setText(shortfoldername);
@@ -103,6 +106,9 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
             else if(extension.equals("txt")){
                 holder.folderimage.setImageResource(R.drawable.ic_pdflogo);
             }
+            else if(extension.equals("docx")){
+                holder.folderimage.setImageResource(R.drawable.docs_logo);
+            }
             else if(extension.equals("")){
                 holder.folderimage.setImageResource(R.drawable.ic_folder);
             }
@@ -127,7 +133,33 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
             public void onClick(View view) {
                 PopupMenu popupMenu=new PopupMenu(context,view);
                 popupMenu.getMenuInflater().inflate(R.menu.popupoptions,popupMenu.getMenu());
+                popupMenu.getMenu().findItem(R.id.options_download).setVisible(false);
+                popupMenu.getMenu().findItem(R.id.option_delete).setVisible(false);
                 popupMenu.show();
+                Call<MyAccessWorkspace> call=RetrofitClient.getApiInterface().myaccess("Bearer "+token,data.getUuid());
+                call.enqueue(new Callback<MyAccessWorkspace>() {
+                    @Override
+                    public void onResponse(Call<MyAccessWorkspace> call, Response<MyAccessWorkspace> response) {
+                        if(response.isSuccessful()){
+                            MyAccessWorkspace myAccessWorkspace=response.body();
+                            String[] access=myAccessWorkspace.getData();
+                            Set<String> ss=new HashSet();
+                            for(int i=0;i<access.length;i++){
+                                ss.add(access[i]);
+                            }
+                            if(ss.contains("download") && data.getType().equals("File")){
+                                popupMenu.getMenu().findItem(R.id.options_download).setVisible(true);
+                            }
+                            if(ss.contains("delete")){
+                                popupMenu.getMenu().findItem(R.id.option_delete).setVisible(true);
+                            }
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<MyAccessWorkspace> call, Throwable t) {
+
+                    }
+                });
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {

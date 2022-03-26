@@ -13,11 +13,10 @@
     tools:context=".Workspace">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/folderslist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/folderslist"
-        tools:listitem="@layout/dataview"
-        />
+        tools:listitem="@layout/dataview" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="80dp"
