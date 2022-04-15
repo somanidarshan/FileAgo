@@ -5,9 +5,6 @@
     <item android:title="Download"
         android:id="@+id/options_download"
        />
-    <item android:title="Move"
-        android:id="@+id/option_move"
-        />
     <item android:title="Delete"
         android:id="@+id/option_delete"
         />

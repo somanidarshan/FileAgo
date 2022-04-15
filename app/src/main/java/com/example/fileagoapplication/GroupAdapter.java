@@ -16,12 +16,14 @@ import java.util.ArrayList;
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> {
     private ArrayList<groupdata> groupdataArrayList;
     private Context context;
+    private String fileaccesskey;
     private String token;
 
-    public GroupAdapter(ArrayList<groupdata> groupdataArrayList, Context context, String token) {
+    public GroupAdapter(ArrayList<groupdata> groupdataArrayList, Context context, String token,String fileaccesskey) {
         this.groupdataArrayList = groupdataArrayList;
         this.context = context;
         this.token = token;
+        this.fileaccesskey=fileaccesskey;
     }
 
     @NonNull
@@ -42,6 +44,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> 
                 i.putExtra("groupname",groupdata.getGroup_name());
                 i.putExtra("uuid",groupdata.getGroup_uuid());
                 i.putExtra("token",token);
+                i.putExtra("filekey",fileaccesskey);
                 context.startActivity(i);
             }
         });

@@ -14,11 +14,11 @@
         android:name="com.example.fileagoapplication.Groups"
         android:label="Groups"
         tools:layout="@layout/fragment_groups" />
-    <fragment
-        android:id="@+id/chat"
-        android:name="com.example.fileagoapplication.Chat"
-        android:label="Chat"
-        tools:layout="@layout/fragment_chat" />
+<!--    <fragment-->
+<!--        android:id="@+id/chat"-->
+<!--        android:name="com.example.fileagoapplication.Chat"-->
+<!--        android:label="Chat"-->
+<!--        tools:layout="@layout/fragment_chat" />-->
 
 
 

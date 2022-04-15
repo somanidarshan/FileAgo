@@ -1,5 +1,8 @@
 package com.example.fileagoapplication;
+import static android.graphics.Color.TRANSPARENT;
+
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
@@ -18,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ActionMenuView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -67,12 +71,8 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Url;
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private ArrayList<data> dataArrayList;
-    private Boolean isSelected =false;
-    private ArrayList<data> selecteditems=new ArrayList<>();
     private Context context;
     private String fileaccesskey;
-    private FloatingActionButton extendedFloatingActionButton;
-    private FloatingActionButton fab1,fab2;
     private String token;
     private Long updated;
     private AlertDialog.Builder dialogBuilder;
@@ -118,6 +118,10 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             String time=simpletimeFormat.format(updated);
             String combine=time+" "+date;
             holder.updatedtext.setText(combine);
+            if(data.getType().equals("Dir")){
+                holder.folderimage.setImageResource(R.drawable.ic_folder);
+                holder.filesize.setText(""+data.getSize());
+            }
             if(data.getType().equals("File")){
                 String filename = data.getName();
                 String filenameArray[] = filename.split("\\.");
@@ -126,7 +130,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 if(extension.equals("pdf")) {
                     holder.folderimage.setImageResource(R.drawable.ic_pdflogo);
                 }
-                else if(extension.equals("jpg") || extension.equals("png")){
+                else if(extension.equals("jpg") || extension.equals("png") || extension.equals("jpeg")){
                     holder.folderimage.setImageResource(R.drawable.imageicon);
                 }
                 else if(extension.equals("txt")){
@@ -135,25 +139,27 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 else if(extension.equals("docx")){
                     holder.folderimage.setImageResource(R.drawable.docs_logo);
                 }
-                else if(extension.equals("")){
-                    holder.folderimage.setImageResource(R.drawable.ic_folder);
+                else if(extension.equals("mp3")){
+                    holder.folderimage.setImageResource(R.drawable.audio_file);
+                }
+                else{
+                    holder.folderimage.setImageResource(R.drawable.zip_file);
                 }
                 size=data.getSize();
                 String filessize= "";
                 if (size >= 1073741824) {
                     filessize= (size / 1073741824)+ " GB";
                 }
-                if (size >= 1048576) {
+                else if (size >= 1048576) {
                     filessize= (size / 1048576) + " MB";
                 }
-                if (size >= 1024) {
+                else if (size >= 1024) {
                     filessize= (size / 1024)+ " KB";
                 }
                 else {
                     filessize= size + " Bytes";
                 }
                 holder.filesize.setText(filessize);
-
                 /*
                 if (size >= 1073741824) { return (size / 1073741824).toFixed(decimal) + " GB" }
                 if (size >= 1048576) { return (size / 1048576).toFixed(decimal) + " MB" }
@@ -204,15 +210,11 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                                     Toast.makeText(context, "Delete Clicked", Toast.LENGTH_SHORT).show();
                                     delete(data.getUuid(),token,prevuuid,actionbartitle);
                                      break;
-                                case R.id.option_move:
-                                    Toast.makeText(context, "Move Clicked", Toast.LENGTH_SHORT).show();
-                                    break;
                                 case R.id.option_rename:
                                     Toast.makeText(context, "Rename Clicked", Toast.LENGTH_SHORT).show();
                                     rename(data.getUuid(),token,prevuuid,actionbartitle);
                                     break;
                                 case R.id.options_download:
-
                                     Toast.makeText(context, "Download Clicked", Toast.LENGTH_SHORT).show();
                                     downloadfile(data.getUuid(),data.getName(),fileaccesskey,token);
                                     break;
@@ -228,7 +230,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(isSelected==false && data.getType().equals("Dir")){
+                    if( data.getType().equals("Dir")){
                     Intent i=new Intent(context,RecursiveDatalists.class);
                     i.putExtra("name",data.getName());
                     i.putExtra("uuid",data.getUuid());
@@ -237,16 +239,31 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                     context.startActivity(i);
                     }
                     else if(data.getType().equals("File")){
-                        Intent i=new Intent(Intent.ACTION_VIEW);
-                        i.setAction(Intent.ACTION_DEFAULT);
-                        String filename = data.getName();
-                        String filenameArray[] = filename.split("\\.");
-                        String extension = filenameArray[filenameArray.length-1];
-                       context.startActivity(Intent.createChooser(i,"Opening File"));
+                        Toast.makeText(context, "Please download the File to view", Toast.LENGTH_LONG).show();
                     }
                 }
             });
     }
+    @Override
+    public int getItemCount() {
+        return dataArrayList.size();
+    }
+    public class ViewHolder extends  RecyclerView.ViewHolder{
+        private TextView foldername;
+        private ImageView popupmenu;
+        private ImageView folderimage;
+        private TextView updatedtext;
+        private TextView filesize;
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            folderimage=itemView.findViewById(R.id.folder_image);
+            foldername=itemView.findViewById(R.id.foldername);
+            popupmenu=itemView.findViewById(R.id.moreoptions);
+            updatedtext=itemView.findViewById(R.id.updated);
+            filesize=itemView.findViewById(R.id.filesize);
+        }
+    }
+
     private void downloadfile(String uuid, String name, String fileaccesskey,String token) {
         String filename=name;
         name=URLEncoder.encode(name);
@@ -270,7 +287,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                     request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,filename);
                     DownloadManager dm= (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
                     dm.enqueue(request);
-                        Toast.makeText(context, "Downloaded", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Downloaded", Toast.LENGTH_SHORT).show();
                 }
                 else{
                     Toast.makeText(context, "Error in Downloading", Toast.LENGTH_SHORT).show();
@@ -281,64 +298,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
             }
         });
-    }
-
-    @Override
-    public int getItemCount() {
-        return dataArrayList.size();
-    }
-    public class ViewHolder extends  RecyclerView.ViewHolder{
-        private TextView foldername;
-        private ImageView popupmenu;
-        private ImageView folderimage;
-        private TextView updatedtext;
-        private TextView filesize;
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            folderimage=itemView.findViewById(R.id.folder_image);
-            foldername=itemView.findViewById(R.id.foldername);
-            popupmenu=itemView.findViewById(R.id.moreoptions);
-            updatedtext=itemView.findViewById(R.id.updated);
-            filesize=itemView.findViewById(R.id.filesize);
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    isSelected=true;
-                    if(selecteditems.contains(dataArrayList.get(getAdapterPosition()))){
-                        itemView.setBackgroundColor(Color.TRANSPARENT);
-                        selecteditems.remove(dataArrayList.get(getAdapterPosition()));
-                    }
-                    else{
-                            itemView.setBackgroundColor(Color.DKGRAY);
-                            selecteditems.add(dataArrayList.get(getAdapterPosition()));
-                    }
-                    if(selecteditems.size()==0){
-                        return false;
-                    }
-                    return true;
-                }
-            });
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(isSelected){
-                        if(selecteditems.contains(dataArrayList.get(getAdapterPosition()))){
-                            itemView.setBackgroundColor(Color.TRANSPARENT);
-                            selecteditems.remove(dataArrayList.get(getAdapterPosition()));
-                        }
-                        else{
-                            itemView.setBackgroundColor(Color.DKGRAY);
-                            selecteditems.add(dataArrayList.get(getAdapterPosition()));
-                        }
-                        if(selecteditems.size()==0){
-                            isSelected=false;
-                        }
-                    }
-                    else{
-                    }
-                }
-            });
-        }
     }
     public void delete(String uuid,String token,String prevuuid,String actionbartitle){
         Call<Void> call=RetrofitClient.getApiInterface().deletenode("Bearer "+token,uuid);
@@ -430,3 +389,74 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         });
     }
 }
+/*
+----------COPY PASTE IMPLEMENTATION
+
+itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    isSelected=true;
+                    if(isSelected){
+                        PopupMenu copyoption=new PopupMenu(context,view);
+                        copyoption.getMenuInflater().inflate(R.menu.copy_paste_options,copyoption.getMenu());
+                        copyoption.show();
+                        copyoption.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem menuItem) {
+                                switch (menuItem.getItemId()){
+                                    case R.id.option_copy:
+                                        for(int i=0;i<selecteditems.size();i++){
+                                            finalitems.add(selecteditems.get(i));
+                                            view.setBackgroundColor(TRANSPARENT);
+                                        }
+                                        iscopied=true;
+                                    case R.id.option_move:
+                                        for(int i=0;i<selecteditems.size();i++){
+                                            finalitems.add(selecteditems.get(i));
+                                        }
+                                        ismoved=true;
+                                        break;
+                                }
+                                return true;
+                            }
+                        });
+
+                    }
+                    if(selecteditems.contains(dataArrayList.get(getAdapterPosition()).getUuid())){
+                        itemView.setBackgroundColor(TRANSPARENT);
+                        selecteditems.remove(dataArrayList.get(getAdapterPosition()));
+                    }
+                    else{
+                            itemView.setBackgroundColor(Color.DKGRAY);
+                            selecteditems.add(dataArrayList.get(getAdapterPosition()).getUuid());
+                    }
+                    if(selecteditems.size()==0){
+                        return false;
+                    }
+                    return true;
+                }
+            });
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(isSelected){
+                        if(selecteditems.contains(dataArrayList.get(getAdapterPosition()))){
+                            itemView.setBackgroundColor(TRANSPARENT);
+                            selecteditems.remove(dataArrayList.get(getAdapterPosition()));
+                        }
+                        else{
+                            itemView.setBackgroundColor(Color.DKGRAY);
+                            selecteditems.add(dataArrayList.get(getAdapterPosition()).getUuid());
+                        }
+                        if(selecteditems.size()==0){
+                            isSelected=false;
+                        }
+                    }
+                    else{
+                    }
+                }
+            });
+
+
+
+ */

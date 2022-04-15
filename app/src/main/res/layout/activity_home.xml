@@ -12,11 +12,26 @@
         android:orientation="vertical" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/emailidd"
+        android:id="@+id/hostnamefield"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="230dp"
+        android:layout_marginEnd="10dp"
+        android:hint="Enter the Hostname">
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/hostname"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:inputType="textEmailAddress"
+        android:ems="15"/>
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/emailidd"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="315dp"
         android:layout_marginEnd="10dp"
         android:hint="Enter your Email-id" >
 

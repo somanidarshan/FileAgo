@@ -18,6 +18,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 public class Groups extends Fragment {
     private String token;
+    private String fileaccesskey;
     private RecyclerView groupview;
     private ArrayList<groupdata> groupdataArrayList;
     private GroupAdapter groupadapter;
@@ -29,9 +30,11 @@ public class Groups extends Fragment {
         Bundle data=getArguments();
         if(data!=null){
             token =data.getString("token");
+            fileaccesskey=data.getString("filekey");
+
         }
         groupdataArrayList=new ArrayList<>();
-        groupadapter=new GroupAdapter(groupdataArrayList,getContext(),token);
+        groupadapter=new GroupAdapter(groupdataArrayList,getContext(),token,fileaccesskey);
         groupview.setLayoutManager(new LinearLayoutManager(getContext()));
         groupview.setAdapter(groupadapter);
         getGroups(token);

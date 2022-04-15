@@ -8,8 +8,8 @@
         android:id="@+id/groups"
         android:menuCategory="secondary"
         android:icon="@drawable/ic_groups"/>
-    <item android:title="Chat"
-        android:id="@+id/chat"
-        android:menuCategory="secondary"
-        android:icon="@drawable/ic_chat"/>
+<!--    <item android:title="Chat"-->
+<!--        android:id="@+id/chat"-->
+<!--        android:menuCategory="secondary"-->
+<!--        android:icon="@drawable/ic_chat"/>-->
 </menu>

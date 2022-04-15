@@ -35,7 +35,6 @@ public class HomeActivity extends AppCompatActivity {
         btn=findViewById(R.id.signbtn);
         imagelogo=findViewById(R.id.logo);
         String Logout=getIntent().getStringExtra("Logout");
-
         sharedPreferences=getSharedPreferences("session",MODE_PRIVATE);
         String fileaccesskey=sharedPreferences.getString("filekey",null);
         String emailid=sharedPreferences.getString("email",null);

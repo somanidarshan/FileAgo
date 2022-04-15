@@ -4,17 +4,22 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable-v24/circle_red.xml" value="0.16354166666666667" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/audio_file.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/docs_logo.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/excelicon.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/filelogoicon.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_add.xml" value="0.16354166666666667" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_create_new_folder.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_folder.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_groups.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_more_option.xml" value="0.16354166666666667" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_paste_option.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_pdflogo.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/ic_sahred_with_you.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/imageicon.xml" value="0.16354166666666667" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/paste_option.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/pptlogo.xml" value="0.16354166666666667" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/drawable/zip_file.xml" value="0.16354166666666667" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout-hdpi/dataview.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout-hdpi/fragment_your_stuff.xml" value="0.22" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout-land/activity_workspace.xml" value="0.24597495527728086" />
@@ -36,16 +41,19 @@
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/activity_shared_with_you.xml" value="0.14322916666666666" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/activity_upload_filesto_server.xml" value="0.16666666666666666" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/activity_workspace.xml" value="0.16666666666666666" />
-        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/dataview.xml" value="0.25" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/dataview.xml" value="1.0" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/fragment_chat.xml" value="0.12685185185185185" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/fragment_groups.xml" value="0.12685185185185185" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/fragment_logout.xml" value="0.12685185185185185" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/fragment_your_stuff.xml" value="0.22" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/groupview.xml" value="0.14322916666666666" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/layout/popup.xml" value="0.14322916666666666" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/menu/copy_paste_options.xml" value="0.12731481481481483" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/menu/main.xml" value="0.12685185185185185" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/menu/main_navigationdrawer.xml" value="0.22" />
         <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/menu/popupoptions.xml" value="0.14322916666666666" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.16354166666666667" />
+        <entry key="..\:/Users/irg/AndroidStudioProjects/FileAgoApplication/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.16354166666666667" />
       </map>
     </option>
   </component>

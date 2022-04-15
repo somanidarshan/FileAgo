@@ -51,12 +51,13 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
     private String actionbartitle;
     private String fileaccesskey;
     private long size;
-    public GroupDataAdapter(ArrayList<data> dataArrayList, Context context, String token, String actionbartittle, String groupuuid) {
+    public GroupDataAdapter(ArrayList<data> dataArrayList, Context context, String token, String actionbartittle, String groupuuid,String fileaccesskey) {
         this.dataArrayList = dataArrayList;
         this.context = context;
         this.token = token;
         this.actionbartittle = actionbartittle;
         this.groupuuid = groupuuid;
+        this.fileaccesskey=fileaccesskey;
     }
     @NonNull
     @Override
@@ -70,12 +71,12 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
     public void onBindViewHolder(@NonNull GroupDataAdapter.ViewHolder holder, int position) {
         data data=dataArrayList.get(position);
         String shortfoldername="";
-        if(data.getName().length()>36){
-            for(int i=0;i<20;i++){
+        if(data.getName().length()>32){
+            for(int i=0;i<15;i++){
                 shortfoldername+=data.getName().charAt(i);
             }
             shortfoldername+="...";
-            for(int j=data.getName().length()-12;j<data.getName().length();j++){
+            for(int j=data.getName().length()-10;j<data.getName().length();j++){
                 shortfoldername+=data.getName().charAt(j);
             }
             holder.foldername.setText(shortfoldername);
@@ -100,7 +101,7 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
             if(extension.equals("pdf")) {
                 holder.folderimage.setImageResource(R.drawable.ic_pdflogo);
             }
-            else if(extension.equals("jpg") || extension.equals("png")){
+            else if(extension.equals("jpg") || extension.equals("png") || extension.equals("jpeg")){
                 holder.folderimage.setImageResource(R.drawable.imageicon);
             }
             else if(extension.equals("txt")){
@@ -108,6 +109,9 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
             }
             else if(extension.equals("docx")){
                 holder.folderimage.setImageResource(R.drawable.docs_logo);
+            }
+            else if(extension.equals("mp3")){
+                holder.folderimage.setImageResource(R.drawable.audio_file);
             }
             else if(extension.equals("")){
                 holder.folderimage.setImageResource(R.drawable.ic_folder);
@@ -168,9 +172,7 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
                                 Toast.makeText(context, "Delete Clicked", Toast.LENGTH_SHORT).show();
                                 delete(data.getUuid(),token,prevuuid,actionbartitle);
                                 break;
-                            case R.id.option_move:
-                                Toast.makeText(context, "Move Clicked", Toast.LENGTH_SHORT).show();
-                                break;
+
                             case R.id.option_rename:
                                 Toast.makeText(context, "Rename Clicked", Toast.LENGTH_SHORT).show();
                                 rename(data.getUuid(),token,prevuuid,actionbartitle);
@@ -191,13 +193,16 @@ public class GroupDataAdapter extends RecyclerView.Adapter<GroupDataAdapter.View
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i=new Intent(context,RecursiveGroupDatalist.class);
-                i.putExtra("components",actionbartittle);
-                i.putExtra("name",data.getName());
-                i.putExtra("uuid",data.getUuid());
-                i.putExtra("token",token);
-                i.putExtra("groupuuid",groupuuid);
-                context.startActivity(i);
+                if(data.getType().equals("Dir")) {
+                    Intent i = new Intent(context, RecursiveGroupDatalist.class);
+                    i.putExtra("components", actionbartittle);
+                    i.putExtra("name", data.getName());
+                    i.putExtra("uuid", data.getUuid());
+                    i.putExtra("token", token);
+                    i.putExtra("groupuuid", groupuuid);
+                    i.putExtra("filekey",fileaccesskey);
+                    context.startActivity(i);
+                }
             }
         });
     }

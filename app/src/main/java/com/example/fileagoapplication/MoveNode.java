@@ -11,6 +11,4 @@ public class MoveNode {
 
     private String move_to;
 
-
-
 }

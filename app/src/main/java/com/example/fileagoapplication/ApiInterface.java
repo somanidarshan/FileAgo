@@ -138,7 +138,7 @@ Server: nginx/1.16.1
             "Content-Type: application/json",
 
     })
-    @POST("api/nodes/{uuid}")
+    @POST("api/nodes/{moveNode}")
     Call<Void> movenode(@Header("Authorization") String token,@Path("uuid") String uuid,@Body MoveNode moveNode);
 
 
@@ -165,5 +165,26 @@ Server: nginx/1.16.1
     })
     @GET("api/nodes/{uuid}/myaccess")
     Call<MyAccessWorkspace> myaccess(@Header("Authorization")String token,@Path("uuid")String uuid);
+
+
+
+    //Paste
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 //https://ocean.fileago.com/resources/auth/download/b7a5d70d-c52a-4988-ae3f-1af59fe02340-2b9d303d-a7f7-426d-bc7e-5e5ce0ed233f/9e48b061-be47-4312-bcfb-3e585f910b4c/999999999999999/ToDo.txt

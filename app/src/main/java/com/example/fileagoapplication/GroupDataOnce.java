@@ -34,6 +34,7 @@ public class GroupDataOnce extends AppCompatActivity implements NavigationView.O
     private GroupDataAdapter dataAdapter;
     private String token;
     private Intent i;
+    private String fileaccesskey;
     private String actionbartittle;
     private Boolean isfalse;
     NavigationView navigationView;
@@ -69,6 +70,7 @@ public class GroupDataOnce extends AppCompatActivity implements NavigationView.O
         dataview=findViewById(R.id.folderslist);
         dataArrayList=new ArrayList<>();
         actionbartittle=getIntent().getStringExtra("groupname");
+        fileaccesskey=getIntent().getStringExtra("filekey");
         getSupportActionBar().setTitle(actionbartittle);
         if(actionbartittle==null){
             actionbartittle="Home";
@@ -84,7 +86,19 @@ public class GroupDataOnce extends AppCompatActivity implements NavigationView.O
                     createnewfolderfunction(token,groupuuid);
             }
         });
-        dataAdapter=new GroupDataAdapter(dataArrayList,GroupDataOnce.this,token,actionbartittle,groupuuid);
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i=new Intent(GroupDataOnce.this,UploadFilestoServer.class);
+                i.putExtra("token",token);
+                i.putExtra("uuid",groupuuid);
+                i.putExtra("name",actionbartittle);
+                i.putExtra("filekey",fileaccesskey);
+                startActivity(i);
+                finish();
+            }
+        });
+        dataAdapter=new GroupDataAdapter(dataArrayList,GroupDataOnce.this,token,actionbartittle,groupuuid,fileaccesskey);
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
         getfolders(ss,groupuuid);

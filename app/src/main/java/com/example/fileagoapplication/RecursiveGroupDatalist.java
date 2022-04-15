@@ -32,6 +32,7 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
     private FloatingActionButton extendedFloatingActionButton;
     private FloatingActionButton fab1,fab2;
     private RecyclerView dataview;
+    private String fileaccesskey;
     private ArrayList<data> dataArrayList;
     private GroupDataAdapter dataAdapter;
     private String token;
@@ -57,6 +58,7 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
         getSupportActionBar().setTitle(actionbartittle);
         groupuuid=getIntent().getStringExtra("groupuuid");
         token=getIntent().getStringExtra("token");
+        fileaccesskey=getIntent().getStringExtra("filekey");
         final String ss=token;
         uuid=getIntent().getStringExtra("uuid");
         dataview=findViewById(R.id.folderslist);
@@ -105,10 +107,22 @@ public class RecursiveGroupDatalist extends AppCompatActivity implements Navigat
                 createnewfolderfunction(token,uuid);
             }
         });
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i=new Intent(RecursiveGroupDatalist.this,UploadFilestoServer.class);
+                i.putExtra("token",token);
+                i.putExtra("uuid",uuid);
+                i.putExtra("name",actionbartittle);
+                i.putExtra("filekey",fileaccesskey);
+                startActivity(i);
+                finish();
+            }
+        });
         dataArrayList=new ArrayList<>();
         component=getIntent().getStringExtra("components");
         components.setTitle(component);
-        dataAdapter=new GroupDataAdapter(dataArrayList,RecursiveGroupDatalist.this,token,component,groupuuid);
+        dataAdapter=new GroupDataAdapter(dataArrayList,RecursiveGroupDatalist.this,token,component,groupuuid,fileaccesskey);
         dataview.setLayoutManager(new LinearLayoutManager(this));
         dataview.setAdapter(dataAdapter);
         getfolders(ss,uuid);

@@ -43,7 +43,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
     private SharedPreferences sharedPreferences;
     private AppBarConfiguration appBarConfiguration;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workspace);
         drawerLayout=findViewById(R.id.drawer);
@@ -59,14 +59,14 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
         final NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
         navController = navHostFragment.getNavController();
         appBarConfiguration = new AppBarConfiguration
-                .Builder(new int[]{R.id.yourStuff,R.id.groups,R.id.chat})
+                .Builder(new int[]{R.id.yourStuff,R.id.groups})
                 .build();
         NavigationUI.setupActionBarWithNavController(this,navController,appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavigationView,navController);
         token=getIntent().getStringExtra("token");
         Menu menu=navigationView.getMenu();
         MenuItem components=menu.findItem(R.id.componentname);
-        String emailid=sharedPreferences.getString("emailid",null);
+        String emailid=sharedPreferences.getString("email",null);
         String password=sharedPreferences.getString("pass",null);
 
         if(emailid!=null){
@@ -131,6 +131,7 @@ public class Workspace extends AppCompatActivity implements NavigationView.OnNav
                         components.setTitle("Groups");
                         getSupportActionBar().setTitle("Groups");
                         group.putString("token",token);
+                        group.putString("filekey",fileaccesskey);
                         groups.setArguments(group);
                         fragmentTransaction1.replace(R.id.nav_host_fragment,groups).commit();
                         break;

@@ -43,7 +43,6 @@ import retrofit2.http.POST;
 public class RecursiveDatalists extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private String uuid;
     private AlertDialog.Builder dialogBuilder;
-    private AlertDialog dialog;
     private String  actionbartittle;
     private EditText foldername;
     private String fileaccesskey;
@@ -54,10 +53,9 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
     private ArrayList<data> dataArrayList;
     private DataAdapter dataAdapter;
     private String token;
-    private Uri filedata;
+    private ArrayList<String> copieduuids=new ArrayList<>();
     private NavigationView navigationView;
     private Boolean isfalse;
-    private String filename;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,9 +74,12 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         fileaccesskey=getIntent().getStringExtra("filekey");
         actionbartittle=getIntent().getStringExtra("name");
         getSupportActionBar().setTitle(actionbartittle);
+
         token=getIntent().getStringExtra("token");
         final String ss=token;
         uuid=getIntent().getStringExtra("uuid");
+
+        //Fetching Data
         dataview=findViewById(R.id.folderslist);
         foldername=findViewById(R.id.foldername);
         createfolder=findViewById(R.id.createbutton);
@@ -107,11 +108,13 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
                                     fab1.show();
                                     fab2.show();
                                     isfalse = true;
-                                } else {
+                                }
+                                else {
                                     fab1.hide();
                                     fab2.hide();
                                     isfalse = false;
                                 }
+
                             }
                         });
                     }
@@ -267,4 +270,40 @@ public class RecursiveDatalists extends AppCompatActivity implements NavigationV
         }
         return true;
     }
+
 }
+
+
+/*
+ copieduuids=getIntent().getStringArrayListExtra("datacopied");
+        if(copieduuids!=null) {
+            if (copieduuids.size() != 0) {
+                fab3.show();
+                fab3.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        for (int i = 0; i < copieduuids.size(); i++) {
+                            MoveNode moveNode = new MoveNode();
+                            moveNode.setMove_to(uuid);
+                            Call<Void> call = RetrofitClient.getApiInterface().movenode("Bearer "+token,copieduuids.get(i),moveNode);
+                            call.enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    if (response.isSuccessful()) {
+                                        Toast.makeText(RecursiveDatalists.this, "Copied Successfully", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(RecursiveDatalists.this, "Something Went Wrong", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    Toast.makeText(RecursiveDatalists.this, "Failure", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+ */
