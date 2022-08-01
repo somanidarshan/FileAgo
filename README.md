@@ -1,8 +1,6 @@
 # FileAgo Android Application
-
-![ic_launcher_round](https://github.com/somanidarshan/FileAgo/blob/master/Photos%20for%20Drawable/fileago.png) 
             
-            A secure file management android application for businesses and organizations.Android application for the main software 'FileAgo'.
+ A secure file management android application for businesses and organizations.Android application for the main software 'FileAgo'.
             
     
 ## Screenshots
